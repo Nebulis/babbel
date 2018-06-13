@@ -1,0 +1,8 @@
+.TranslationGame-error {
+  border-color: tomato;
+}
+
+.TranslationGame-expected {
+  color: #28a745;
+  font-weight: bold;
+}
