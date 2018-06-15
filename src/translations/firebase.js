@@ -1,5 +1,5 @@
 import firebase from "firebase";
-import {compose, map, prop, toPairs, zipObj} from 'ramda';
+import {compose, map, prop, toPairs, zipObj, filter, isNil, complement} from 'ramda';
 
 const config = {
   apiKey: "AIzaSyAEGDa0uCULxk0RFhNyUukTkj27ZGGm2Zc",
@@ -23,13 +23,15 @@ export const getAllTranslations = (lang) => {
 };
 
 export const getAllTranslationsBy = (source, target) => {
-  return getAllTranslations(source).then(
-    compose(
-      map(zipObj(['source', 'target'])),
-      toPairs,
-      map(prop(target))
+  return getAllTranslations(source)
+    .then(
+      compose(
+        map(zipObj(['source', 'target'])), // transform to an array of object where 1st element is map to source key and 2nd element is map target key
+        toPairs, // transform to an array of array where 1st element is source and 2nd element is target
+        filter(complement(isNil)), // remove keys with no values
+        map(prop(target)) // create an object where keys are source and values are target
+      )
     )
-  );
 };
 
 export const addTranslations = (sourceLanguage, targetLanguage, sourceValue, targetValue) => {
@@ -45,6 +47,13 @@ export const addTranslations = (sourceLanguage, targetLanguage, sourceValue, tar
       }
     }
   }, {merge: true})
+};
+
+export const deleteTranslations = (sourceLanguage, targetLanguage, sourceValue, targetValue) => {
+  return db.collection("translations").doc(DOCUMENT_ID).update({
+    [`${sourceLanguage}.${sourceValue}.${targetLanguage}`]: firebase.firestore.FieldValue.delete(),
+    [`${targetLanguage}.${targetValue}.${sourceLanguage}`]: firebase.firestore.FieldValue.delete(),
+  });
 };
 
 const provider = new firebase.auth.GoogleAuthProvider();

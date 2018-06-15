@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import './Admin.css'
-import {addTranslations, getAllTranslationsBy} from '../translations/firebase';
+import {addTranslations, getAllTranslationsBy, deleteTranslations} from '../translations/firebase';
 import {Loader} from '../Loader/Loader';
 
 const FETCHING = Symbol();
@@ -27,11 +27,19 @@ export class Admin extends Component {
   }
 
   updateTranslations() {
-    return getAllTranslationsBy(this.props.source, this.props.target).then(translations => this.setState({translations}));
+    return getAllTranslationsBy(this.props.source, this.props.target)
+      .then(translations => this.setState({translations}))
+      .then(_ => this.setState({status: ADDING}));
   }
 
   componentDidMount() {
-    this.updateTranslations().then(_ => this.setState({status: ADDING}));
+    this.updateTranslations();
+  }
+
+  delete({source, target}) {
+    this.setState({status: FETCHING});
+    deleteTranslations(this.props.source, this.props.target, source, target)
+      .then(this.updateTranslations.bind(this));
   }
 
   add() {
@@ -43,7 +51,6 @@ export class Admin extends Component {
         this.setState({
           sourceValue: '',
           targetValue: '',
-          status: ADDING,
         })
       })
       .then(this.updateTranslations.bind(this));
@@ -92,17 +99,23 @@ export class Admin extends Component {
         <h2 className="text-center">{translations.length} translations available</h2>
         <table className="table">
           <thead>
-          <tr>
-            <th scope="col">{source.charAt(0).toUpperCase() + source.slice(1)}</th>
-            <th scope="col">{target.charAt(0).toUpperCase() + target.slice(1)}</th>
+          <tr className="d-flex">
+            <th className="col-6">{source.charAt(0).toUpperCase() + source.slice(1)}</th>
+            <th className="col-5">{target.charAt(0).toUpperCase() + target.slice(1)}</th>
+            <th className="col-1"></th>
           </tr>
           </thead>
           <tbody>
           {
             translations.map((translation, id) => (
-              <tr key={id}>
-                <td>{translation.source}</td>
-                <td>{translation.target}</td>
+              <tr key={id} className="d-flex">
+                <td className="col-6">{translation.source}</td>
+                <td className="col-5">{translation.target}</td>
+                <td className="col-1 text-right">
+                  <span onClick={this.delete.bind(this, translation)} style={{cursor: 'pointer'}}>
+                    <i className="fas fa-trash-alt fa-2x" style={{color: 'tomato'}} />
+                  </span>
+                </td>
               </tr>))
           }
           </tbody>
