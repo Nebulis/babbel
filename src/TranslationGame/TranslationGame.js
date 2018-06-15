@@ -93,7 +93,7 @@ export class TranslationGame extends Component {
       </div>
 
       <div className="row justify-content-center">
-        <button className="btn btn-primary" type="submit" onClick={quit}>
+        <button className="btn btn-primary" type="button" onClick={quit}>
           <i className="fas fa-hourglass-end"/> Stop
         </button>
       </div>

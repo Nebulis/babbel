@@ -9,18 +9,15 @@ const config = {
   projectId: "babbel-99a5d",
   messagingSenderId: "687535823687",
 };
-
+const DOCUMENT_ID = 'JbzJgmt8wJW8NwsFX3qZ';
 
 firebase.initializeApp(config);
-
 const settings = {timestampsInSnapshots: true};
 const db = firebase.firestore();
 db.settings(settings);
 
-const documentId = 'JbzJgmt8wJW8NwsFX3qZ';
-
 export const getAllTranslations = (lang) => {
-  return db.collection("translations").doc(documentId).get().then((doc) => {
+  return db.collection("translations").doc(DOCUMENT_ID).get().then((doc) => {
     return doc.data()[lang];
   });
 };
@@ -36,7 +33,7 @@ export const getAllTranslationsBy = (source, target) => {
 };
 
 export const addTranslations = (sourceLanguage, targetLanguage, sourceValue, targetValue) => {
-  return db.collection("translations").doc(documentId).set({
+  return db.collection("translations").doc(DOCUMENT_ID).set({
     [sourceLanguage]: {
       [sourceValue]: {
         [targetLanguage]: targetValue,
@@ -48,4 +45,18 @@ export const addTranslations = (sourceLanguage, targetLanguage, sourceValue, tar
       }
     }
   }, {merge: true})
-}
+};
+
+const provider = new firebase.auth.GoogleAuthProvider();
+
+export const onAuthStateChanged = (cb) => firebase.auth().onAuthStateChanged(cb);
+
+export const login = () => {
+  return firebase
+    .auth()
+    .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .then(() => firebase.auth().signInWithPopup(provider))
+    .catch((error) => {
+      // TODO
+    });
+};
