@@ -74,7 +74,8 @@ export class TranslationGame extends Component {
         <h1 className="col text-center">{this.state.translations[index].source}</h1>
       </div>
       <div className="row">
-          <form className="col justify-content-center form-inline">
+        {/* e.preventDefault is a fix for chrome/safari on iphone 8 (maybe more)*/}
+          <form className="col justify-content-center form-inline" onSubmit={e => e.preventDefault()}>
             <input type="text"
                  className={`text-center form-control ${className}`}
                  ref={this.inputRef}
