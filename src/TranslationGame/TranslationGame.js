@@ -24,6 +24,23 @@ export class TranslationGame extends Component {
     return Math.floor(Math.random()*(max-min+1)+min);
   }
 
+  /**
+   * Test if 2 strings are equals by:
+   * - ignoring case
+   * - ignoring diacritics.
+   * @example
+   * stringEquals('a', 'v'); // returns false
+   * @example
+   * stringEquals('frère', 'FRERE'); // returns true
+   *
+   * @param {string} str a string
+   * @param {string} str2 another string
+   * @return {boolean} true if both strings are equals, false otherwise
+   */
+  stringEquals(str, str2) {
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase() === str2.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase()
+  }
+
   componentDidMount() {
     getAllTranslationsBy(this.props.source, this.props.target)
       .then(translations => this.setState({translations, status: GUESSING, index: this.getNextIndex(0, translations.length - 1)}))
@@ -32,7 +49,7 @@ export class TranslationGame extends Component {
 
   validate() {
     let timeout = 0;
-    if (this.state.value === this.state.translations[this.state.index].target) {
+    if (this.stringEquals(this.state.value, this.state.translations[this.state.index].target)) {
       this.setState({status: SUCCESS});
       timeout = 1000;
     } else {
