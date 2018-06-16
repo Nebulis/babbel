@@ -3,6 +3,7 @@ import './Admin.css'
 import {addTranslations, getAllTranslationsBy, deleteTranslations} from '../translations/firebase';
 import {Loader} from '../Loader/Loader';
 import {normalize} from '../Services/string';
+import {Voice} from '../Voice/Voice';
 
 const FETCHING = Symbol();
 const SAVING = Symbol();
@@ -117,8 +118,8 @@ export class Admin extends Component {
           {
             limitedTranslations.map((translation, id) => (
               <tr key={id} className="d-flex">
-                <td className="col-6">{translation.source}</td>
-                <td className="col-5">{translation.target}</td>
+                <td className="col-6">{translation.source} <Voice text={translation.source} lang="en-US"/></td>
+                <td className="col-5">{translation.target} <Voice text={translation.target} lang="fr-FR"/></td>
                 <td className="col-1 text-right">
                   <span onClick={this.delete.bind(this, translation)} style={{cursor: 'pointer'}}>
                     <i className="fas fa-trash-alt fa-2x" style={{color: 'tomato'}} />
