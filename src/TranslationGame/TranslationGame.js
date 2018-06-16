@@ -20,9 +20,13 @@ export class TranslationGame extends Component {
     };
   }
 
+  getNextIndex(min, max) {
+    return Math.floor(Math.random()*(max-min+1)+min);
+  }
+
   componentDidMount() {
     getAllTranslationsBy(this.props.source, this.props.target)
-      .then(translations => this.setState({translations, status: GUESSING}))
+      .then(translations => this.setState({translations, status: GUESSING, index: this.getNextIndex(0, translations.length - 1)}))
       .then(_ => this.inputRef.current.focus());
   }
 
@@ -37,12 +41,11 @@ export class TranslationGame extends Component {
     }
 
     setTimeout(() => {
-      this.inputRef.current.focus();
       this.setState({
         status: GUESSING,
         value: '',
-        index: this.state.index + 1,
-      });
+        index: this.getNextIndex(0, this.state.translations.length - 1),
+      }, () => this.inputRef.current.focus()); // set focus after
     }, timeout);
   }
 
