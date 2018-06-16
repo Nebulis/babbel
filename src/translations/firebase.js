@@ -18,7 +18,7 @@ db.settings(settings);
 
 export const getAllTranslations = (lang) => {
   return db.collection("translations").doc(DOCUMENT_ID).get().then((doc) => {
-    return doc.data()[lang];
+    return doc.data()[lang] || [];
   });
 };
 
