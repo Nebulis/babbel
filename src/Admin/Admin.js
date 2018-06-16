@@ -64,9 +64,8 @@ export class Admin extends Component {
     const {sourceLang, targetLang, quit} = this.props;
     const {sourceValue, targetValue, status, translations} = this.state;
     // compute translations matching the sourceValue
-    const filteredTranslations = translations.filter(translation => normalize(translation.source).includes(normalize(sourceValue)));
     // get only the 50 first items
-    const limitedTranslations = filteredTranslations.slice(0, 50);
+    const filteredTranslations = translations.filter(translation => normalize(translation.source).includes(normalize(sourceValue))).slice(0, 50);
 
     if(status === FETCHING) {
       return <Loader />
@@ -116,7 +115,7 @@ export class Admin extends Component {
           </thead>
           <tbody>
           {
-            limitedTranslations.map((translation, id) => (
+            filteredTranslations.map((translation, id) => (
               <tr key={id} className="d-flex">
                 <td className="col-6">{translation.source} <Voice text={translation.source} lang="en-US"/></td>
                 <td className="col-5">{translation.target} <Voice text={translation.target} lang="fr-FR"/></td>
