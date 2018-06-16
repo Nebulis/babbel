@@ -2,6 +2,7 @@ import React, {Component, Fragment} from 'react';
 import './Admin.css'
 import {addTranslations, getAllTranslationsBy, deleteTranslations} from '../translations/firebase';
 import {Loader} from '../Loader/Loader';
+import {normalize} from '../Services/string';
 
 const FETCHING = Symbol();
 const SAVING = Symbol();
@@ -15,7 +16,7 @@ export class Admin extends Component {
       targetValue: '',
       status: FETCHING,
       translations: []
-    }
+    };
     this.sourceRef = React.createRef();
   }
 
@@ -27,27 +28,27 @@ export class Admin extends Component {
     this.setState({targetValue: event.target.value});
   }
 
-  updateTranslations() {
-    return getAllTranslationsBy(this.props.source, this.props.target)
+  getTranslations() {
+    return getAllTranslationsBy(this.props.sourceLang, this.props.targetLang)
       .then(translations => this.setState({translations}))
       .then(_ => this.setState({status: ADDING}));
   }
 
   componentDidMount() {
-    this.updateTranslations();
+    this.getTranslations();
   }
 
   delete({source, target}) {
     this.setState({status: FETCHING});
-    deleteTranslations(this.props.source, this.props.target, source, target)
-      .then(this.updateTranslations.bind(this));
+    deleteTranslations(this.props.sourceLang, this.props.targetLang, source, target)
+      .then(this.getTranslations.bind(this));
   }
 
   add() {
     this.setState({
       status: SAVING,
     });
-    addTranslations(this.props.source, this.props.target, this.state.sourceValue, this.state.targetValue)
+    addTranslations(this.props.sourceLang, this.props.targetLang, this.state.sourceValue, this.state.targetValue)
       .then(_ => {
         this.setState({
           sourceValue: '',
@@ -55,12 +56,16 @@ export class Admin extends Component {
         })
       })
       .then(() => this.sourceRef.current.focus())
-      .then(this.updateTranslations.bind(this));
+      .then(this.getTranslations.bind(this));
   }
 
   render() {
-    const {source, target, quit} = this.props;
+    const {sourceLang, targetLang, quit} = this.props;
     const {sourceValue, targetValue, status, translations} = this.state;
+    // compute translations matching the sourceValue
+    const filteredTranslations = translations.filter(translation => normalize(translation.source).includes(normalize(sourceValue)));
+    // get only the 50 first items
+    const limitedTranslations = filteredTranslations.slice(0, 50);
 
     if(status === FETCHING) {
       return <Loader />
@@ -72,45 +77,45 @@ export class Admin extends Component {
           <i className="fas fa-chevron-left"/> Back to lobby
         </button>
       </div>
-      <form>
-        <div className="form-row">
-          <div className="col-md-6 col-12">
-            <input type="text"
-                   ref={this.sourceRef}
-                   value={sourceValue}
-                   onChange={this.handleChangeSourceValue.bind(this)}
-                   className="form-control"
-                   placeholder={source.charAt(0).toUpperCase() + source.slice(1)}/>
+      <Fragment>
+        <form>
+          <div className="form-row">
+            <div className="col-md-4 col-12">
+              <input type="text"
+                     ref={this.sourceRef}
+                     value={sourceValue}
+                     onChange={this.handleChangeSourceValue.bind(this)}
+                     className="form-control"
+                     placeholder={sourceLang.charAt(0).toUpperCase() + sourceLang.slice(1)}/>
+            </div>
+            <div className="col-md-4 col-12 pt-2 pt-md-0">
+              <input type="text"
+                     value={targetValue}
+                     onChange={this.handleChangeTargetValue.bind(this)}
+                     className="form-control"
+                     placeholder={targetLang.charAt(0).toUpperCase() + targetLang.slice(1)}/>
+            </div>
+            <div className="col-md-4 col-12 pt-2 pt-md-0">
+              <button className="btn btn-success btn-block" type="submit" onClick={this.add.bind(this)}
+                      disabled={status === SAVING}>
+                <i className="fas fa-plus-circle"/> Add
+              </button>
+            </div>
           </div>
-          <div className="col-md-6 col-12 pt-2 pt-md-0">
-            <input type="text"
-                   value={targetValue}
-                   onChange={this.handleChangeTargetValue.bind(this)}
-                   className="form-control"
-                   placeholder={target.charAt(0).toUpperCase() + target.slice(1)}/>
-          </div>
-        </div>
-        <div className="form-row pt-2">
-          <div className="col m-auto col-12 col-sm-4">
-            <button className="btn btn-success btn-block" type="submit" onClick={this.add.bind(this)}
-                    disabled={status === SAVING}>
-              <i className="fas fa-plus-circle"/> Add
-            </button>
-          </div>
-        </div>
-
-        <h2 className="text-center">{translations.length} translations available</h2>
+        </form>
+        <hr />
+        <h2 className="text-center">{filteredTranslations.length} / {translations.length} translations</h2>
         <table className="table">
           <thead>
           <tr className="d-flex">
-            <th className="col-6">{source.charAt(0).toUpperCase() + source.slice(1)}</th>
-            <th className="col-5">{target.charAt(0).toUpperCase() + target.slice(1)}</th>
+            <th className="col-6">{sourceLang.charAt(0).toUpperCase() + sourceLang.slice(1)}</th>
+            <th className="col-5">{targetLang.charAt(0).toUpperCase() + targetLang.slice(1)}</th>
             <th className="col-1"></th>
           </tr>
           </thead>
           <tbody>
           {
-            translations.map((translation, id) => (
+            limitedTranslations.map((translation, id) => (
               <tr key={id} className="d-flex">
                 <td className="col-6">{translation.source}</td>
                 <td className="col-5">{translation.target}</td>
@@ -123,7 +128,7 @@ export class Admin extends Component {
           }
           </tbody>
         </table>
-      </form>
+      </Fragment>
     </Fragment>
   }
 }

@@ -3,6 +3,7 @@ import './TranslationGame.css';
 import {getAllTranslationsBy} from '../translations/firebase';
 import {Loader} from '../Loader/Loader';
 import {Voice} from '../Voice/Voice';
+import {normalize} from '../Services/string';
 
 const FETCHING = Symbol();
 const GUESSING = Symbol();
@@ -40,8 +41,7 @@ export class TranslationGame extends Component {
    * @return {boolean} true if both strings are equals, false otherwise
    */
   stringEquals(str, str2) {
-    const normalize = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-    return  normalize(str)=== normalize(str2);
+    return normalize(str)=== normalize(str2);
   }
 
   componentDidMount() {
