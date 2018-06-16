@@ -1,12 +1,12 @@
-import React, {Component} from 'react';
-import {login, getUser} from '../translations/firebase';
+import React from 'react';
+import {login, logout} from '../translations/firebase';
 import {UserContext} from '../User/UserContext';
 
 export const Connexion = () => {
   return <UserContext.Consumer>
     {(user) => (
-      user ? <img style={{borderRadius: '50%', width: '36px', height: '36px'}}
-                  src={user.photoURL}/>
+      user ? <a href="#" onClick={logout}><img style={{borderRadius: '50%', width: '36px', height: '36px'}}
+                                              src={user.photoURL}/></a>
         :
         <a href="#" onClick={login}>
           <svg xmlns="https://www.w3.org/2000/svg" width="36px" height="36px" viewBox="0 0 48 48" fill="#757575"

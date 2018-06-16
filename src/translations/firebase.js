@@ -69,3 +69,9 @@ export const login = () => {
       // TODO
     });
 };
+
+export const logout = () => {
+  return firebase
+    .auth()
+    .signOut();
+};
