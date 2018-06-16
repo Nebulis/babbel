@@ -29,6 +29,7 @@ export class TranslationGame extends Component {
    * Test if 2 strings are equals by:
    * - ignoring case
    * - ignoring diacritics.
+   * - ignoring trailing and leading spaces
    * @example
    * stringEquals('a', 'v'); // returns false
    * @example
@@ -39,7 +40,8 @@ export class TranslationGame extends Component {
    * @return {boolean} true if both strings are equals, false otherwise
    */
   stringEquals(str, str2) {
-    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase() === str2.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase()
+    const normalize = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    return  normalize(str)=== normalize(str2);
   }
 
   componentDidMount() {
