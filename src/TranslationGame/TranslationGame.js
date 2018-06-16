@@ -2,6 +2,7 @@ import React, {Fragment, Component} from 'react';
 import './TranslationGame.css';
 import {getAllTranslationsBy} from '../translations/firebase';
 import {Loader} from '../Loader/Loader';
+import {Voice} from '../Voice/Voice';
 
 const FETCHING = Symbol();
 const GUESSING = Symbol();
@@ -88,7 +89,7 @@ export class TranslationGame extends Component {
     const className = status === FAILED ? 'TranslationGame-error' : '';
     return <Fragment>
       <div className="row">
-        <h1 className="col text-center">{this.state.translations[index].source}</h1>
+        <h1 className="col text-center">{this.state.translations[index].source} <Voice text={this.state.translations[index].source} lang="en-US"/></h1>
       </div>
       <div className="row">
         {/* e.preventDefault is a fix for chrome/safari on iphone 8 (maybe more)*/}
