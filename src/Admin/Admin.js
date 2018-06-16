@@ -16,6 +16,7 @@ export class Admin extends Component {
       status: FETCHING,
       translations: []
     }
+    this.sourceRef = React.createRef();
   }
 
   handleChangeSourceValue(event) {
@@ -53,6 +54,7 @@ export class Admin extends Component {
           targetValue: '',
         })
       })
+      .then(() => this.sourceRef.current.focus())
       .then(this.updateTranslations.bind(this));
   }
 
@@ -74,6 +76,7 @@ export class Admin extends Component {
         <div className="form-row">
           <div className="col-md-6 col-12">
             <input type="text"
+                   ref={this.sourceRef}
                    value={sourceValue}
                    onChange={this.handleChangeSourceValue.bind(this)}
                    className="form-control"
