@@ -31,6 +31,7 @@ export class TranslationGame extends Component {
    * - ignoring case
    * - ignoring diacritics.
    * - ignoring trailing and leading spaces
+   * - ignoring leading to (for english words)
    * @example
    * stringEquals('a', 'v'); // returns false
    * @example
