@@ -5,10 +5,10 @@ import {UserContext} from '../User/UserContext';
 export const Connexion = () => {
   return <UserContext.Consumer>
     {(user) => (
-      user ? <a href="#" onClick={logout}><img style={{borderRadius: '50%', width: '36px', height: '36px'}}
+      user ? <a href="#" onClick={logout} style={{height: '36px'}}><img style={{borderRadius: '50%', width: '36px', height: '36px'}}
                                               src={user.photoURL}/></a>
         :
-        <a href="#" onClick={login}>
+        <a href="#" onClick={login} style={{height: '36px'}}>
           <svg xmlns="https://www.w3.org/2000/svg" width="36px" height="36px" viewBox="0 0 48 48" fill="#757575"
                aria-hidden="true">
             <path

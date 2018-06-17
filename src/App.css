@@ -12,3 +12,23 @@
   right: 15px;
   min-width: 200px;
 }
+
+.App-brand {
+  margin-right: 0;
+}
+
+.App-languages-list {
+  background: var(--gray);
+  padding: 0;
+  min-width: auto;
+  border: none;
+}
+
+.App-languages-list .flag-icon {
+  margin: 5px 10px;
+  background-color: #28a745;
+}
+
+.App-languages-list .flag-icon:first-of-type {
+  margin-top: 0px;
+}

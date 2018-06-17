@@ -39,6 +39,14 @@ export class Admin extends Component {
     this.getTranslations();
   }
 
+  // when one of the lang change then fetch new data
+  componentDidUpdate(prevProps) {
+    if(prevProps.sourceLang !== this.props.sourceLang || prevProps.targetLang !== this.props.targetLang ) {
+      this.setState({status: FETCHING});
+      this.getTranslations();
+    }
+  }
+
   delete({source, target}) {
     this.setState({status: FETCHING});
     deleteTranslations(this.props.sourceLang, this.props.targetLang, source, target)
