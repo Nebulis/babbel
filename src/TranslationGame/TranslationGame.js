@@ -23,7 +23,7 @@ export class TranslationGame extends Component {
   }
 
   getNextIndex(min, max) {
-    return Math.floor(Math.random()*(max-min+1)+min);
+    return Math.floor(Math.random() * (max - min + 1) + min);
   }
 
   /**
@@ -41,13 +41,17 @@ export class TranslationGame extends Component {
    * @return {boolean} true if both strings are equals, false otherwise
    */
   stringEquals(str, str2) {
-    return normalize(str)=== normalize(str2);
+    return normalize(str) === normalize(str2);
   }
 
   componentDidMount() {
-    getAllTranslationsBy(this.props.source, this.props.target)
-      .then(translations => this.setState({translations, status: GUESSING, index: this.getNextIndex(0, translations.length - 1)}))
-      .then(_ => this.inputRef.current.focus());
+    getAllTranslationsBy(this.props.sourceLang, this.props.targetLang)
+      .then(translations => this.setState({
+        translations,
+        status: GUESSING,
+        index: this.getNextIndex(0, translations.length - 1)
+      }))
+      .then(_ => this.inputRef.current && this.inputRef.current.focus());
   }
 
   validate() {
@@ -83,36 +87,43 @@ export class TranslationGame extends Component {
   render() {
     const {quit} = this.props;
     const {status, value, index} = this.state;
+    const translation = this.state.translations[index];
 
-    if(status === FETCHING) {
-      return <Loader />
+    if (status === FETCHING) {
+      return <Loader/>
+    }
+    if (!translation) {
+      return <div className="d-flex justify-content-center">
+        <img src="https://media.giphy.com/media/nNxT5qXR02FOM/giphy.gif"/>
+      </div>
     }
 
     const className = status === FAILED ? 'TranslationGame-error' : '';
     return <Fragment>
       <div className="row">
-        <h1 className="col text-center">{this.state.translations[index].source} <Voice text={this.state.translations[index].source} lang="en-US"/></h1>
+        <h1 className="col text-center">{translation.source} <Voice text={translation.source} lang="en-US"/></h1>
       </div>
       <div className="row">
         {/* e.preventDefault is a fix for chrome/safari on iphone 8 (maybe more)*/}
-          <form className="col justify-content-center form-inline" onSubmit={e => e.preventDefault()}>
-            <input type="text"
+        <form className="col justify-content-center form-inline" onSubmit={e => e.preventDefault()}>
+          <input type="text"
                  className={`text-center form-control ${className}`}
                  ref={this.inputRef}
                  value={value}
                  onChange={this.handleChange.bind(this)}
                  onKeyDown={this.handleOnKeyDown.bind(this)}
                  disabled={status !== GUESSING}
-            />
-          </form>
+          />
+        </form>
       </div>
       <div className="row pt-2 pb-2">
-        {status === SUCCESS && <div className="col text-center"><i className="fas fa-check-circle fa-3x" style={{color: '#28a745'}}/></div>}
+        {status === SUCCESS &&
+        <div className="col text-center"><i className="fas fa-check-circle fa-3x" style={{color: '#28a745'}}/></div>}
         {status === FAILED &&
-          <div className="col text-center d-flex justify-content-center align-items-center">
-            <i className="fas fa-times-circle fa-3x pr-2" style={{color: 'tomato'}} />
-            <span className="pt-1 TranslationGame-expected">{this.state.translations[index].target}</span>
-          </div>}
+        <div className="col text-center d-flex justify-content-center align-items-center">
+          <i className="fas fa-times-circle fa-3x pr-2" style={{color: 'tomato'}}/>
+          <span className="pt-1 TranslationGame-expected">{translation.target}</span>
+        </div>}
         {status === GUESSING && <div style={{minHeight: '48px'}}></div>}
       </div>
 

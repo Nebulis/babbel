@@ -87,7 +87,7 @@ class App extends Component {
             }
           </div>
           }
-          {status === GAME && <TranslationGame source={sourceLang.name} target={targetLang.name} quit={this.lobby.bind(this)}/>}
+          {status === GAME && <TranslationGame sourceLang={sourceLang.name} targetLang={targetLang.name} quit={this.lobby.bind(this)}/>}
           {status === ADMIN && <Admin sourceLang={sourceLang.name} targetLang={targetLang.name} quit={this.lobby.bind(this)}/>}
         </div>
       </UserContext.Provider>
