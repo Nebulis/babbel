@@ -73,7 +73,8 @@ export class Admin extends Component {
     const {sourceValue, targetValue, status, translations} = this.state;
     // compute translations matching the sourceValue
     // get only the 50 first items
-    const filteredTranslations = translations.filter(translation => normalize(translation.source).includes(normalize(sourceValue))).slice(0, 50);
+    const options = {ignoreTo: false};
+    const filteredTranslations = translations.filter(translation => normalize(translation.source, options).includes(normalize(sourceValue, options))).slice(0, 50);
 
     if(status === FETCHING) {
       return <Loader />
