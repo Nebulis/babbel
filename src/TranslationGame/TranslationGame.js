@@ -5,9 +5,13 @@ import {Loader} from '../Loader/Loader';
 import {Voice} from '../Voice/Voice';
 import {normalize} from '../Services/string';
 
+// component status
 const FETCHING = Symbol();
 const GUESSING = Symbol();
-const FAILED = Symbol();
+const SUMMARIZING = Symbol();
+
+// guesses status
+const FAILURE = Symbol();
 const SUCCESS = Symbol();
 
 export class TranslationGame extends Component {
@@ -19,6 +23,7 @@ export class TranslationGame extends Component {
       value: '',
       index: 0,
       translations: [],
+      guesses: [],
     };
   }
 
@@ -57,21 +62,44 @@ export class TranslationGame extends Component {
 
   validate() {
     let timeout = 0;
+    let status;
     if (this.stringEquals(this.state.value, this.state.translations[this.state.index].target)) {
-      this.setState({status: SUCCESS});
+      status = SUCCESS;
       timeout = 1000;
     } else {
-      this.setState({status: FAILED});
+      status = FAILURE;
       timeout = 2500;
     }
-
+    this.setState({status});
     setTimeout(() => {
       this.setState({
         status: GUESSING,
         value: '',
         index: this.getNextIndex(0, this.state.translations.length - 1),
+        guesses: [
+          ...this.state.guesses,
+          {
+            guessed: this.state.value,
+            expected: this.state.translations[this.state.index].target,
+            translation: this.state.translations[this.state.index].source,
+            status,
+          }
+        ]
       }, () => this.inputRef.current.focus()); // set focus after
     }, timeout);
+  }
+
+  restart() {
+    this.setState({
+      status: GUESSING,
+      value: '',
+      index: this.getNextIndex(0, this.state.translations.length - 1),
+      guesses: [],
+    })
+  }
+
+  stop() {
+    this.setState({status: SUMMARIZING});
   }
 
   handleChange(event) {
@@ -85,21 +113,11 @@ export class TranslationGame extends Component {
     }
   }
 
-  render() {
-    const {quit} = this.props;
+  renderGame() {
     const {status, value, index} = this.state;
     const translation = this.state.translations[index];
+    const className = status === FAILURE ? 'TranslationGame-error' : '';
 
-    if (status === FETCHING) {
-      return <Loader/>
-    }
-    if (!translation) {
-      return <div className="d-flex justify-content-center">
-        <img src="https://media.giphy.com/media/nNxT5qXR02FOM/giphy.gif"/>
-      </div>
-    }
-
-    const className = status === FAILED ? 'TranslationGame-error' : '';
     return <Fragment>
       <div className="row">
         <h1 className="col text-center">{translation.source} <Voice text={translation.source} lang="en-US"/></h1>
@@ -119,8 +137,9 @@ export class TranslationGame extends Component {
       </div>
       <div className="row pt-2 pb-2">
         {status === SUCCESS &&
-        <div className="col text-center"><i className="fas fa-check-circle fa-3x" style={{color: '#28a745'}}/></div>}
-        {status === FAILED &&
+        <div className="col text-center"><i className="fas fa-check-circle fa-3x" style={{color: 'var(--success)'}}/>
+        </div>}
+        {status === FAILURE &&
         <div className="col text-center d-flex justify-content-center align-items-center">
           <i className="fas fa-times-circle fa-3x pr-2" style={{color: 'tomato'}}/>
           <span className="pt-1 TranslationGame-expected">{translation.target}</span>
@@ -129,11 +148,73 @@ export class TranslationGame extends Component {
       </div>
 
       <div className="row justify-content-center">
-        <button className="btn btn-primary" type="button" onClick={quit}>
+        <button className="btn btn-primary" type="button" onClick={this.stop.bind(this)} disabled={status !== GUESSING}>
           <i className="fas fa-hourglass-end"/> Stop
         </button>
       </div>
     </Fragment>
-      ;
+  }
+
+  renderSummary() {
+    const {sourceLang, targetLang, quit} = this.props;
+    const {guesses} = this.state;
+    return (
+      <Fragment>
+        <div className="row justify-content-center pb-2">
+          <button className="btn btn-primary mr-2" type="button" onClick={quit}>
+            <i className="fas fa-chevron-left"/> Back to lobby
+          </button>
+          <button className="btn btn-primary" type="button" onClick={this.restart.bind(this)}>
+            <i className="fas fa-sync-alt"/> Restart
+          </button>
+        </div>
+        <table className="table">
+          <thead>
+          <tr className="d-flex">
+            <th className="col-2"></th>
+            <th className="col-5">{sourceLang.charAt(0).toUpperCase() + sourceLang.slice(1)}</th>
+            <th className="col-5">{targetLang.charAt(0).toUpperCase() + targetLang.slice(1)}</th>
+          </tr>
+          </thead>
+          <tbody>
+          {
+            guesses.map((guess, id) => (
+              <tr key={id} className={`d-flex`}>
+                <td className="col-2">
+                  {
+                    guess.status === FAILURE ?
+                      <i className="fas fa-times-circle fa-3x pr-2" style={{color: 'tomato'}}/>
+                      :
+                      <i className="fas fa-check-circle fa-3x" style={{color: 'var(--success'}}/>
+                  }
+                </td>
+                <td className="col-5 font-weight-bold d-flex align-items-center">{guess.translation}</td>
+                <td className="col-5 d-flex align-items-center">
+                  {guess.status === FAILURE && <span className="TranslationGame-failure">{guess.guessed}&nbsp;</span>}
+                  <span className="TranslationGame-success">{guess.expected}</span>
+                </td>
+              </tr>))
+          }
+          </tbody>
+        </table>
+      </Fragment>
+    )
+  }
+
+  render() {
+    const {quit} = this.props;
+    const {status, index} = this.state;
+    const translation = this.state.translations[index];
+
+    if (status === FETCHING) {
+      return <Loader/>
+    }
+    if (!translation) {
+      // no translation ? really ? display sth fancy
+      return <div className="d-flex justify-content-center">
+        <img src="https://media.giphy.com/media/nNxT5qXR02FOM/giphy.gif"/>
+      </div>
+    }
+    return <Fragment>{status === SUMMARIZING ? this.renderSummary() : this.renderGame()}</Fragment>
   };
 }

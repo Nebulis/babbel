@@ -6,3 +6,14 @@
   color: #28a745;
   font-weight: bold;
 }
+
+.TranslationGame-success {
+  color: var(--success);
+  font-weight: bold;
+}
+
+.TranslationGame-failure {
+  color: var(--danger);
+  font-weight: bold;
+  text-decoration: line-through;
+}
